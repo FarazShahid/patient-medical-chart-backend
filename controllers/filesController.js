@@ -24,7 +24,7 @@ exports.searchFiles = async (req, res) => {
     if (gender) query.gender = { $regex: gender, $options: "i" };
     if (cityStateZip)
       query.cityStateZip = { $regex: cityStateZip, $options: "i" };
-    if (recordId) query.recordId = { $regex: recordId, $options: "i" };
+    if (recordId) query.recordId = { $regex: recordId, $options: "i" }; // ✅ FIXED: keep it as string-based regex
 
     const [results, total] = await Promise.all([
       FileData.find(query).skip(skip).limit(parseInt(limit)),
@@ -45,7 +45,7 @@ exports.searchFiles = async (req, res) => {
 
 exports.getAllFiles = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; 
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
     const skip = (page - 1) * limit;
 
