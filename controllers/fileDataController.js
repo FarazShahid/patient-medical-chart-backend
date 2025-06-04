@@ -12,7 +12,7 @@ if (!fs.existsSync(path.dirname(logFilePath))) {
 function logToFile(message) {
   const timestamp = new Date().toISOString();
   fs.appendFileSync(logFilePath, `[${timestamp}] ${message}\n`);
-  console.log(`[${timestamp}] ${message}`)
+  console.log(`[${timestamp}] ${message}`);
 }
 
 async function processPdfFolder(folderPath, baseFolder = folderPath) {
@@ -47,13 +47,13 @@ async function processPdfFolder(folderPath, baseFolder = folderPath) {
           ...fields,
         });
         const savedDoc = await doc.save();
-        if(savedDoc){
-          const msg = `[Log] Saved data for ${entry.name}:, ${fields}`
-          logToFile(msg)
+        if (savedDoc) {
+          const msg = `[Log] Saved data for ${entry.name}:, ${fields}`;
+          logToFile(msg);
         }
       } catch (err) {
-        const msg = `[Error] processing ${entry.name}:, ${err.message}`
-         logToFile(msg)
+        const msg = `[Error] processing ${entry.name}:, ${err.message}`;
+        logToFile(msg);
       }
     }
   }

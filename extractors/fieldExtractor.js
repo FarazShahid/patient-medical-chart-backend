@@ -12,13 +12,15 @@ function extractFields(text) {
   const cityStateZipMatch =
     text.match(/City\/State\/Zip\s*\s*(.+)/i) ||
     text.match(/City\/State\/Zip\s+(.+)/i);
+  const idMatch = text.match(/id\s*#?(\d+)/i);
 
   return {
     name: nameMatch ? nameMatch[1].trim() : "",
-    sex: sexMatch ? sexMatch[1].trim() : "",
+    gender: sexMatch ? sexMatch[1].trim() : "",
     dob: dobMatch ? dobMatch[1].trim() : "",
     address: addressMatch ? addressMatch[1].trim() : "",
     cityStateZip: cityStateZipMatch ? cityStateZipMatch[1].trim() : "",
+    recordId: idMatch ? idMatch[1].trim() : "",
   };
 }
 
