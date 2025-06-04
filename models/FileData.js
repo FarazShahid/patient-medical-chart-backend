@@ -2,13 +2,14 @@ const mongoose = require("mongoose");
 
 const fileDataSchema = new mongoose.Schema(
   {
+    recordId: String,
     filename: String,
     path: String,
     name: String,
     dob: String,
     address: String,
     gender: String,
-    cityStateZip: String,
+    cityStateZip: String
   },
   { timestamps: true }
 );
@@ -17,5 +18,6 @@ fileDataSchema.index({ filename: "text" });
 fileDataSchema.index({ name: "text" });
 fileDataSchema.index({ dob: "text" });
 fileDataSchema.index({ address: "text" });
+fileDataSchema.index({ recordId: "text" });
 
 module.exports = mongoose.model("FileData", fileDataSchema);
