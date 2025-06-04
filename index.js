@@ -18,5 +18,5 @@ app.use(express.static(folderName))
 app.use('/api', fileRoutes);
 
 app.listen(PORT, HOST, () => {
-  console.log(`Server running at https://${HOST}:${PORT}`);
+  console.log(`Server running at http://${HOST}:${PORT}`);
 });
