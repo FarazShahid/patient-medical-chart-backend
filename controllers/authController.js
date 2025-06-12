@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { createToken } = require("../utils/jwt");
 const bcrypt = require("bcryptjs");
+const { logToFile } = require("../utils/logger");
 
 const login = async (req, res) => {
   try {
@@ -17,6 +18,7 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     if (user.isTemporaryPassword) {
+      logToFile(`${email} used temporary password`, "Auth");
       return res.status(307).json({ redirect: true, email: user.email });
     }
     const token = createToken({
@@ -24,6 +26,7 @@ const login = async (req, res) => {
       email: user.email,
       username: user.username,
     });
+    logToFile(`${email} logged in`, "Auth");
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
@@ -56,7 +59,7 @@ const registerUser = async (req, res) => {
       isTemporaryPassword: true,
     });
     await user.save();
-
+    logToFile(`${email} new user created`, "Auth");
     console.log("user", user);
 
     res.status(201).json({ message: "User registered successfully", user });
@@ -78,6 +81,7 @@ const resetPassword = async (req, res) => {
     user.password = hashedPassword;
     user.isTemporaryPassword = false;
     await user.save();
+    logToFile(`${email} password reset`, "Auth");
     return res.status(200).json({ message: "Password reset successfull" });
   } catch (err) {
     console.log("Error:", err);

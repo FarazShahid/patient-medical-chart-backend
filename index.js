@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const authMiddleware = require("./middlewares/authMiddleware");
+const logUserActivity = require("./middlewares/logUserActivity");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(folderName));
 
-app.use("/api/files", authMiddleware, fileRoutes);
+app.use("/api/files", authMiddleware,logUserActivity, fileRoutes);
 app.use("/api/auth", authRoutes);
 
 app.listen(PORT, HOST, () => {
