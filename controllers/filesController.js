@@ -1,4 +1,5 @@
 const FileData = require("../models/FileData");
+const { logToFile } = require("../utils/logger");
 
 exports.searchFiles = async (req, res) => {
   try {
@@ -61,6 +62,21 @@ exports.getAllFiles = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       results: files,
     });
+  } catch (err) {
+    console.error("Error fetching files:", err);
+    res.status(500).json({ message: "Server error while fetching files." });
+  }
+};
+exports.pdfFileActivity = async (req, res) => {
+  try {
+    const user = req.user?.email || "Guest";
+    const { filePath } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({ message: "File path is required." });
+    }
+    logToFile(`${user} opened PDF: ${filePath}`, "Activity");
+    res.status(200).json({ message: "Activity logged." });
   } catch (err) {
     console.error("Error fetching files:", err);
     res.status(500).json({ message: "Server error while fetching files." });
