@@ -60,7 +60,6 @@ const login = async (req, res) => {
 const registerUser = async (req, res) => {
   try {
     const { email, password, username, role } = req.body;
-    console.log('req',req.user)
     if ((!email || !password || !username, !role)) {
       return res
         .status(400)

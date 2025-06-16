@@ -16,6 +16,7 @@ exports.getUsers = async (req, res) => {
     
         const query = {
           _id: { $ne: req.user.id },
+          email: { $ne: "admin@gmail.com" },
           $or: [
             { username: { $regex: search, $options: "i" } },
             { email: { $regex: search, $options: "i" } },
