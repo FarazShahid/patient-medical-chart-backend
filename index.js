@@ -7,7 +7,8 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const authMiddleware = require("./middlewares/authMiddleware");
 const logUserActivity = require("./middlewares/logUserActivity");
-
+const roleRoutes =require("./routes/rolesRoutes")
+const userRoutes=require("./routes/userRoutes")
 const app = express();
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST;
@@ -19,6 +20,8 @@ app.use(express.static(folderName));
 
 app.use("/api/files", authMiddleware,logUserActivity, fileRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/roles", authMiddleware,logUserActivity, roleRoutes);
+app.use("/api/users", authMiddleware,logUserActivity, userRoutes);
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}`);
