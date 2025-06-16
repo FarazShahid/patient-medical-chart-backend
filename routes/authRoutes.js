@@ -5,7 +5,7 @@ const checkAdmin = require('../middlewares/checkAmdin');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.post('/login', login);
-router.post('/registerUser', authMiddleware,checkAdmin,registerUser);
+router.post('/registerUser',registerUser);
 router.patch('/resetPassword', resetPassword);
 
 module.exports = router;

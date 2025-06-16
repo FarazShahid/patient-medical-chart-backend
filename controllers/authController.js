@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const { logToFile } = require("../utils/logger");
 const Role = require("../models/Role");
 const jwt = require('jsonwebtoken'); // Only if not already imported
+const {encrypt,decrypt} =require('../utils/encrypt')
+
 const SECRET = process.env.JWT_SECRET; // Or however you store your secret
 const login = async (req, res) => {
   try {
@@ -20,8 +22,9 @@ const login = async (req, res) => {
       return res.status(403).json({ error: "Your account is inactive. Please contact admin." });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // const isMatch = await bcrypt.compare(password, user.password);
+    const decryptedPassword = decrypt(user.password);
+    if (password !== decryptedPassword) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
@@ -57,6 +60,7 @@ const login = async (req, res) => {
 const registerUser = async (req, res) => {
   try {
     const { email, password, username, role } = req.body;
+    console.log('req',req.user)
     if ((!email || !password || !username, !role)) {
       return res
         .status(400)
@@ -76,13 +80,15 @@ const registerUser = async (req, res) => {
 
     // Set isTemporaryPassword to true only if role is 'admin'
     const isTemporaryPassword = roleData.name.toLowerCase() === "admin";
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(password, salt);
+    const encryptedPassword = encrypt(password);
+
 
     const user = new User({
       username,
       email,
-      password: hashedPassword,
+      password: encryptedPassword,
       isTemporaryPassword,
       role: roleData._id,
     });
@@ -95,12 +101,11 @@ const registerUser = async (req, res) => {
       name: roleData.name,
     };
     await user.save();
-    logToFile(`${email} new user created`, "Auth");
+    logToFile(`${email} new user created by ${req.user?.email}`, "Auth");
     res.status(201).json({
       message: "User registered successfully",
       user: userObject,
     });
-    console.log("user", user);
   } catch (err) {
     console.log("Error:", err);
     return res.status(500).json({ error: "Internal server error" });
@@ -139,9 +144,11 @@ const resetPassword = async (req, res) => {
     }
 
     // 3. Reset password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    user.password = hashedPassword;
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const encryptedPassword = encrypt(newPassword);
+
+    user.password = encryptedPassword;
     user.isTemporaryPassword = false;
     await user.save();
 
