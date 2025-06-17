@@ -6,7 +6,6 @@ const Role = require("../models/Role");
 const jwt = require('jsonwebtoken'); // Only if not already imported
 const {encrypt,decrypt} =require('../utils/encrypt')
 
-const SECRET = process.env.JWT_SECRET; // Or however you store your secret
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
