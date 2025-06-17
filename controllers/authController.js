@@ -47,11 +47,13 @@ const login = async (req, res) => {
 
     res.json({
       token,
-      email: populatedUser.email,
-      username: populatedUser.username,
-      role: populatedUser.role,
+      email: populatedUser?.email||'',
+      username: populatedUser?.username||'',
+      role: populatedUser?.role||'',
     });
   } catch (err) {
+    console.log(err)
+    logToFile(`${err} `, "ERROR");
     res.status(500).json({ error: "Server error" });
   }
 };
