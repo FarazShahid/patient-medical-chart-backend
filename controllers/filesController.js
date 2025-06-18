@@ -71,14 +71,12 @@ exports.pdfFileActivity = async (req, res) => {
   try {
     const user = req.user?.email || "Guest";
     const { filePath } = req.body;
-
     if (!filePath) {
       return res.status(400).json({ message: "File path is required." });
     }
-    logToFile(`${user} opened PDF: ${filePath}`, "Activity");
+    logToFile(`${req?.user?.username} ${user} opened PDF: ${filePath}`, "Activity");
     res.status(200).json({ message: "Activity logged." });
   } catch (err) {
     console.error("Error fetching files:", err);
-    res.status(500).json({ message: "Server error while fetching files." });
   }
 };

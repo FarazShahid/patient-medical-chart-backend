@@ -1,7 +1,8 @@
 const Role = require("../models/Role");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const {encrypt,decrypt} =require('../utils/encrypt')
+const {encrypt,decrypt} =require('../utils/encrypt');
+const { logToFile } = require("../utils/logger");
 // Get all users with search and limit
 exports.getUsers = async (req, res) => {
     try {
@@ -40,8 +41,9 @@ exports.getUsers = async (req, res) => {
             }
           });
         const total = await User?.countDocuments(query);
-    
+        
         res.json({ users:usersWithDecryptedPasswords, total });
+        logToFile(`${req?.user?.username} ${req?.user?.email} get user list`, "Activity");
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
@@ -59,6 +61,8 @@ exports.getUserById = async (req, res) => {
         user.password = null; 
       }
     res.json(user);
+    logToFile(`${req?.user?.username} ${req?.user?.email} get user ${user?.email}`, "Activity");
+
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -76,6 +80,8 @@ exports.updateUser = async (req, res) => {
 
     if (!updated) return res.status(404).json({ message: "User not found" });
     res.json(updated);
+    logToFile(`${req?.user?.username} ${req?.user?.email} update user ${email}`, "Activity");
+
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -84,9 +90,12 @@ exports.updateUser = async (req, res) => {
 // Delete user
 exports.deleteUser = async (req, res) => {
   try {
+      let deleteduser = await User.findById(req.params.id);
     const deleted = await User.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: "User not found" });
     res.json({ message: "User deleted" });
+    logToFile(`${req?.user?.username} ${req?.user?.email} delete user ${deleteduser?.email}`, "Activity");
+
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
@@ -107,6 +116,8 @@ exports.changePassword = async (req, res) => {
     await user.save();
 
     res.json({ message: "Password changed successfully" });
+    logToFile(`${req?.user?.username} ${req?.user?.email} update password of ${user?.email}`, "Activity");
+
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -124,7 +135,19 @@ exports.toggleUserActive = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json({ message: `User ${isActive ? "activated" : "deactivated"}`, user });
+    logToFile(`${req?.user?.username} ${req?.user?.email} update status of ${user?.email}`, "Activity");
+
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.logoutActivity = async (req, res) => {
+    try {
+      const user = req.user?.email || "Guest";     
+      logToFile(`${req?.user?.username} ${user} logged out`, "Auth");
+      res.status(200).json({ message: "Activity logged." });
+    } catch (err) {
+      console.error("Error fetching files:", err);
+      res.status(500).json({ message: "Server error while fetching files." });
+    }
+  };

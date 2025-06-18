@@ -28,7 +28,7 @@ const login = async (req, res) => {
     }
 
     if (user.isTemporaryPassword) {
-      logToFile(`${email} used temporary password`, "Auth");
+      logToFile(`${user?.username} ${email} used temporary password`, "Auth");
       return res.status(307).json({ redirect: true, email: user.email });
     }
 
@@ -38,7 +38,7 @@ const login = async (req, res) => {
       username: user.username,
     });
 
-    logToFile(`${email} logged in`, "Auth");
+    logToFile(`${user?.username} ${email} logged in`, "Auth");
 
     const populatedUser = await User.findById(user._id)
       .populate("role", "role_id name description -_id")
@@ -101,7 +101,7 @@ const registerUser = async (req, res) => {
       name: roleData.name,
     };
     await user.save();
-    logToFile(`${email} new user created by ${req.user?.email}`, "Auth");
+    logToFile(`${req.user?.username} ${req.user?.email} new user created ${email}`, "Auth");
     res.status(201).json({
       message: "User registered successfully",
       user: userObject,
@@ -152,7 +152,7 @@ const resetPassword = async (req, res) => {
     user.isTemporaryPassword = false;
     await user.save();
 
-    logToFile(`${email} password reset`, "Auth");
+    logToFile(`${user?.username} ${email} password reset`, "Auth");
     return res.status(200).json({ message: "Password reset successful" });
 
   } catch (err) {
