@@ -11,6 +11,13 @@ exports.getLogs = async (req, res) => {
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 25, 25), 100);
 
   try {
+    if (!fs.existsSync(logFilePath)) {
+        return res.json({
+          success: true,
+          data: [],
+          total: 0,
+        });
+      }
     // Read full log file
     const data = fs.readFileSync(logFilePath, "utf8");
     const lines = data.split("\n").filter((line) => line.trim().length > 0);
