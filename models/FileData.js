@@ -19,5 +19,6 @@ fileDataSchema.index({ name: "text" });
 fileDataSchema.index({ dob: "text" });
 fileDataSchema.index({ address: "text" });
 fileDataSchema.index({ recordId: "text" });
-
+fileDataSchema.index({ name: 1 });
+fileDataSchema.index({ recordId: 1 });
 module.exports = mongoose.model("FileData", fileDataSchema);
