@@ -32,20 +32,52 @@ exports.searchFiles = async (req, res) => {
     const sortDirections = sort.split(",");
     const allowedSortFields = ["name", "recordId"]; // you can extend this list
     const sortOptions = {};
-
-    sortFields.forEach((field, i) => {
-      if (allowedSortFields.includes(field)) {
-        const direction = (sortDirections[i] || "asc").toLowerCase() === "desc" ? -1 : 1;
-        sortOptions[field] = direction;
-      }
-    });
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
+    const sortDirection = sort.toLowerCase() === "desc" ? -1 : 1;
+    const pipeline = [
+      { $match: query },
+      {
+        $addFields: {
+          [`is${sortField}Alpha`]: {
+            $cond: [
+              {
+                $regexMatch: {
+                  input: { $ifNull: [`$${sortField}`, ""] },
+                  regex: /^[A-Za-z]/, // ✅ Starts with letter only
+                },
+              },
+              1, // Valid
+              0, // Invalid (number, symbol, or empty)
+            ],
+          },
+        },
+      },
+      {
+        $sort: {
+          [`is${sortField}Alpha`]: -1, // valid (1) on top
+          [sortField]: sortDirection,
+        },
+      },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ];
     const [results, total] = await Promise.all([
-      FileData.find(query)
-        .sort( sortOptions )
-        .skip(skip)
-        .limit(parseInt(limit)),
+      FileData.aggregate(pipeline),
       FileData.countDocuments(query),
     ]);
+    // sortFields.forEach((field, i) => {
+    //   if (allowedSortFields.includes(field)) {
+    //     const direction = (sortDirections[i] || "asc").toLowerCase() === "desc" ? -1 : 1;
+    //     sortOptions[field] = direction;
+    //   }
+    // });
+    // const [results, total] = await Promise.all([
+    //   FileData.find(query)
+    //     .sort( sortOptions )
+    //     .skip(skip)
+    //     .limit(parseInt(limit)),
+    //   FileData.countDocuments(query),
+    // ]);
 
     res.json({
       total,
@@ -72,16 +104,48 @@ exports.getAllFiles = async (req, res) => {
 
    const allowedSortFields = ["name", "recordId"];
    const sortOptions = {};
+   const sortField = allowedSortFields.includes(sortBy) ? sortBy : "name";
+   const sortDirection = sort === "desc" ? -1 : 1;
 
-   sortFields.forEach((field, i) => {
-     if (allowedSortFields.includes(field)) {
-       const direction = (sortDirections[i] || "asc").toLowerCase() === "desc" ? -1 : 1;
-       sortOptions[field] = direction;
-     }
-   });
+  //  sortFields.forEach((field, i) => {
+  //    if (allowedSortFields.includes(field)) {
+  //      const direction = (sortDirections[i] || "asc").toLowerCase() === "desc" ? -1 : 1;
+  //      sortOptions[field] = direction;
+  //    }
+  //  });
+  const pipeline = [
+    {
+      $addFields: {
+        [`is${sortField}Valid`]: {
+          $cond: [
+            {
+              $regexMatch: {
+                input: { $ifNull: [`$${sortField}`, ""] },
+                regex: /^[A-Za-z]/
+              }
+            },
+            1, // valid name
+            0  // invalid or special char start
+          ]
+        }
+      }
+    },
+    {
+      $sort: {
+        [`is${sortField}Valid`]: -1, // valid names (1) first
+        [sortField]: sortDirection
+      }
+    },
+    { $skip: skip },
+    { $limit: limit }
+  ];
+    // const [files, total] = await Promise.all([
+    //   FileData.find().sort(sortOptions).skip(skip).limit(limit),
+    //   FileData.countDocuments(),
+    // ]);
     const [files, total] = await Promise.all([
-      FileData.find().sort(sortOptions).skip(skip).limit(limit),
-      FileData.countDocuments(),
+      FileData.aggregate(pipeline),
+      FileData.countDocuments()
     ]);
 
     res.json({
